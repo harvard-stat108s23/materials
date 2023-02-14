@@ -3,7 +3,7 @@ title: "Problem Set 2"
 author: "Insert Name"
 date: "Stat 108, Week 3"
 output:
-  html_document: default
+  pdf_document: default
 urlcolor: blue
 ---
 
