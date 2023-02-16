@@ -1,4 +1,4 @@
-name,movie_id,gender,imdb_index
+name,id,gender,imdb_index
 "McConville, Kelly",4323293,f,I
 "McConville, Kelly",4579132,f,I
 "McConville, Kelly",554349,f,I
