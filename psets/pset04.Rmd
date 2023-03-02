@@ -1,0 +1,337 @@
+---
+title: "Problem Set 4"
+author: "Insert Name"
+date: "Stat 108, Week 6"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+urlcolor: blue
+---
+
+### Collaborators
+
+I collaborated with... (list names of collaborators here).
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+
+## Notes on Submitting
+
+1. Please knit to PDF and submit that on Gradescope.  When knitting to PDF, include `eval = FALSE` in any code chunks that contain an interactive graph.
+2. Please also knit to HTML and push that (along with the Rmd and any other relevant files) to your `work-username` GitHub repo so that the graders can access the HTML document with your interactive graphs. (So include `eval = TRUE` in any code chunks that contain an interactive graph when knitting to HTML).
+
+
+## Due: Wednesday, March 22nd at 10:00pm
+
+
+## Goals of this problem set
+
+1. Practice creating static and interactive maps.
+1. Wrangle and interact with dates, factors, and strings.
+1. Consider and inspect data quality issues.
+1. Extract knowledge from text data.
+
+## Problems
+
+```{r}
+# Put all necessary libraries here
+# We got you started!
+library(tidyverse)
+library(tidycensus)
+```
+
+### Problem 1
+
+Let's come back to the Cambridge crash data once again. Create an interactive leaflet map of the crashes. In your map, include:
+
+* A feature that controls how much the viewer can zoom in or out on the map.
+* An appropriate base tile for the map.
+* A car icon for each crash. (Consider using a small file size for your icon!)
+* A pop-up that produces some useful information about each crash.
+
+
+```{r}
+crash_data <- read_csv("https://raw.githubusercontent.com/harvard-stat108s23/materials/main/psets/data/cambridge_cyclist_ped_crash.csv") 
+```
+
+
+
+
+### Problem 2
+
+In this problem we will look at creating maps of state-level information for the US.  We will use the `USStates` dataset which lives in the `Lock5Data` package.  You can run `?USStates` in the console to see the data dictionary for `USStates`.
+
+```{r}
+library(Lock5Data)
+glimpse(USStates)
+```
+
+
+a. As we discussed in class, there are several projection choices we can make when creating a map.  Run the following code to obtain the US states shapefile from the `tigris` package and to explore some common projections.  Discuss the pros and cons of the following projections and make an argument for which you think is optimal for mapping the US.
+
+```{r}
+# Note: In the code below I included tigris:: to highlight
+# the functions that are from the tigris package.
+
+us_states <- tigris::states(cb = TRUE, resolution = "20m", progress_bar = FALSE)
+
+# Default CRS = NAD 1983
+ggplot(us_states) + 
+  geom_sf() + 
+  theme_void()
+
+# Albers Equal Area Projection
+ggplot(us_states) + 
+  geom_sf() + 
+  coord_sf(crs = 'ESRI:102003') + 
+  theme_void()
+
+# Lambert Azimuthal Equal-Area Projection
+ggplot(us_states) + 
+  geom_sf() + 
+  coord_sf(crs = "+proj=laea") + 
+  theme_void()
+
+# Robinson Projection
+ggplot(us_states) + 
+  geom_sf() + 
+  coord_sf(crs = "+proj=vandg4") + 
+  theme_void()
+
+#### Shifted Albers Projections
+# Option 1
+us_states_shifted1 <- tigris::shift_geometry(us_states, 
+                                             preserve_area = FALSE,
+                                             position = "below")
+
+ggplot(us_states_shifted1) + 
+  geom_sf() + 
+  theme_void()
+
+
+# Option 2
+us_states_shifted2 <- tigris::shift_geometry(us_states, 
+                                             preserve_area = TRUE,
+                                             position = "below")
+
+ggplot(us_states_shifted2) + 
+  geom_sf() + 
+  theme_void()
+
+# Option 3
+us_states_shifted3 <- tigris::shift_geometry(us_states, 
+                                             preserve_area = FALSE,
+                                             position = "outside")
+
+ggplot(us_states_shifted3) + 
+  geom_sf() + 
+  theme_void()
+
+
+# Option 4
+us_states_shifted4 <- tigris::shift_geometry(us_states, 
+                                             preserve_area = TRUE,
+                                             position = "outside")
+
+ggplot(us_states_shifted4) + 
+  geom_sf() + 
+  theme_void()
+```
+
+
+
+b. Based on your favorite projection in (a), create a choropleth map of the percent of the state residents eating vegetables at least once per day.  
+
+
+c. Now create a cartogram of the percent of the state residents eating vegetables at least once per day where the size of each state polygon depends on the state's population size.
+
+
+d. Lastly create a hexbin map of the percent of the state residents eating vegetables at least once per day.
+
+
+e. Compare and contrast the graphs given in (b) - (d). Make an argument as to which graph you find the most compelling. 
+
+
+### Problem 3 
+
+*Are Volcanic Eruptions Increasing?* The [Smithsonian's Global Volcanism Program](https://volcano.si.edu/) (GVP) keeps up-to-date information on the volcanoes of the world and their eruptions.  GVP also maintains information on all documented eruptions from the last 10,000 years and we will explore this dataset for Problems 3 and 4.  Note: I downloaded the data in Spring of 2016.
+
+
+```{r}
+Eruptions <- read_csv("https://raw.githubusercontent.com/harvard-stat108s23/materials/main/psets/data/GVP_Eruption_Results.csv")
+```
+
+a. Subset the data frame to only include confirmed eruptions (`EruptionCategory`).  Now how many observations do we have? What does each row of the dataset represent?  (Use this subset for the rest of the problem.)
+
+
+
+
+b. If we want to plot year versus the number of eruptions that started that year, what do we want each row to represent?  What variables would you want to include in that dataset?
+
+
+c. Create a dataset that contains year and the number of eruptions that started in that year. Graph the number of eruptions over time.  Discuss any trends you see in the plot.
+
+
+
+
+
+d. Let's focus on eruptions that started in 1900 onward.  From 1900 onward, produce a graph of start year versus the number of eruptions and include the line of best fit (i.e., estimated regression line).  Address the question: "Are volcanic eruptions increasing over time?"
+
+
+ 
+e. Let's explore how sampling bias might have impacted these data.  
+
+First, rewrangle the data and include the average size of the explosions in a given year.  We will measure size using the Volcanic Explosivity Index (VEI), a measure of how explosive an eruption is. Create a dataset with starting year, frequency of eruptions, and average VEI per year for 1900 onward.  Then produce a graph of starting year versus count with average VEI mapped to color. 
+
+
+f. Examine the graph produced in part (e). Answer the following questions and comment on how these points might impact data quality (for all eruptions that happened from 1900 onward).
+
+  * Why are there two time periods with dips in the number of eruptions? (Note: The dip periods are pretty brief.)
+  
+  * How might size of eruption relate to probability of detection over time?
+
+
+
+g. Subset the data to only larger confirmed eruptions (VEI >=2) from 1900 onward and recreate the graph of starting year versus count with average VEI mapped to color.  Based on this graph, do eruptions appear to be increasing over time?
+
+
+
+### Problem 4
+
+From what we learned in Problem 3, let's only consider eruptions that **ended** in 1968 (the year GVP started documenting eruptions) or ended later than 1968.
+
+
+a. Subset the Eruptions dataset to only confirmed eruptions that ended in 1968 or later. Use these data for the rest of the problem.
+
+
+
+b. Add a `StartDate` column and an `EndDate` column; each column should incorporate the year, month, and day.  Also add a column that contains the date interval. (Use the [`lubridate` cheatsheet](https://rawgit.com/rstudio/cheatsheets/main/lubridate.pdf) to figure out how to create the column for date interval.)
+
+
+c. Create a dataset of dates that failed to parse the `StartDate` (and therefore have an NA entry).  Why did those dates fail to parse?
+
+
+
+d. Find a `lubridate` function that measures the length of a time interval and add a column to the dataset that gives the length of each eruption interval in days.
+
+
+
+e. Construct a graph that attempts to answer the question: Is there a relationship between VEI (the size of the eruption) and the length of an eruption?  Summarize the conclusions from your graph.
+
+
+
+f.  Create a data frame of the 10 volcanoes with the longest eruptions and display the `VolcanoName`, `total_time`, and `Interval`.  This table presents what data quality issue? (Feel free to use the internet to verify the issue.)
+
+
+g. Create plots that explore the number of eruptions over the days of the week and the months of the year. Comment on any patterns (or lack of patterns) that you see.
+
+
+
+### Problem 5
+  
+Let's return to the `babynames` dataset.  Recall that this dataset contains yearly information on the frequency of baby names by sex and is provided by the US Social Security Administration.  It includes all names with at least 5 uses per year per sex. In this problem, we are going to practice pattern matching!
+
+Note: If you use the `str_view_all()` function to help construct your regular expressions, we'd recommend first subsetting the dataset and not including the output of `str_view_all()` in the pdf.
+
+```{r}
+library(babynames)
+data("babynames")
+#?babynames
+```
+
+a. Find the ten most popular baby names that contain the letter z (lower or upper case).  Hint: `slice_max()` might be useful.
+
+
+
+b. Find the ten most popular baby names that start with the letter Z. 
+
+
+
+c. Find the ten most popular baby names that end with the letter Z. 
+
+
+
+d. Between your three tables in parts (a) - (c), do any of the names show up on more than one list?  If so, which ones? (Yes, we know you could do this visually but use some joins!)
+
+
+
+
+e.  Verify that none of the baby names contain a numeric (0-9) in them.
+
+
+f. While none of the names contain 0-9, that doesn't mean they don't contain "one", "two", ..., or "nine".  Create a table that provides the number of times a baby's name contained the word "zero", the word "one", ... the word "nine". 
+
+Notes: 
+
+* We recommend first converting all the names to lower case.
+* If none of the baby names contain the written number, then you can leave the number out of the table.
+* Use `str_extract()`, not `str_extract_all()`. (We will ignore names where more than one of the (number) words exists.)
+
+
+
+g. Which written number or numbers don't show up in any of the baby names?
+
+
+
+
+h. Create a table that contains the names and their frequencies for the two least common written numbers.
+
+
+
+i. Redo part (f) but this time produce a table that counts the number of babies named "zero", "one", "two", ... "nine" (instead of just containing the number).  How does this table compare to the table from part (f)?
+
+
+j. Create a table that contains the longest baby names.
+
+
+
+k. Verify that none of the babynames have spaces in them.  Relate this finding back to what you observed for the long baby names in (j).
+
+
+
+
+l. Find the names that contain more vowels than consonants. (Let's assume y is always a consonant.)  Don't print the whole table as it is a bit long.  Instead report the number of distinct baby names that contain more vowels than consonants.
+
+
+
+m. Find the baby names that have four vowels in a row.
+
+
+m. Find the baby names that have the same vowel repeated three times in a row (ex: "aaa", "ooo").  Create a data frame that reports the baby name and the number of babies born with that name.
+
+
+
+### Problem 6
+
+Pick 4 texts to analyze.  These could be 4 books, 4 music albums, 4 speeches, etc.  Below we give you some suggestions of R packages that import texts.
+
+Notes: 
+
+* The following code creates a data frame of all of the texts in the `gutenbergr` package and then, as an example, grabs the text for "Call of the Wild."
+
+```{r}
+library(gutenbergr)
+works <- gutenberg_works()
+wild <- gutenberg_download(215)
+```
+
+* The `geniusr` package can be used to pull lyrics from various albums.  To use this package, you will need to create a Genius API client.  Instructions can be found [here](https://ewenme.github.io/geniusr/articles/geniusr.html).
+
+
+a. Load your four texts here and state what texts are you are analyzing for this problem.
+
+b. Pick one of your texts from (a) and create two wordclouds of the word frequency for the top 20 (non-stop) words. (We recommend using either the `wordcloud` or the `wordcloud2` package.) For one of the wordclouds, map the frequency of the word both to the size of the text and to the color.  For the other, only map frequency of the word to the size of the text.  Which of your two wordclouds do you prefer?  Explain your reasoning.
+
+c. Using the same text that you used in (b) create a bar graph of the top 10 most common bi-grams in the text.
+
+d. Create a graphic that compares the sentiments of the four texts in some way. 
+
+e. Create a graphic that presents the highest tf_idfs for various words in the four texts.
+
+f. Write a paragraph of key takeaways from parts (b) - (e).
+
+
+
