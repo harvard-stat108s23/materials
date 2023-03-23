@@ -12,11 +12,11 @@ urlcolor: blue
 I collaborated with... (list names of collaborators here).
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
 ```
 
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 # Put all necessary libraries here
 library(tidyverse)
 ```
