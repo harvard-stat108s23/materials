@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = TRUE, message = TRUE)
 ```
 
 
-```{r, warning = FALSE, message = FALSE}
+```{r}
 # Put all necessary libraries here
 library(tidyverse)
 ```
