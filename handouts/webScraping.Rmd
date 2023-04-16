@@ -17,12 +17,13 @@ library(rvest)
 
 # Understanding HTML Tables
 
-* In our shared folder, open the document "pdxTreesHTMLTable.html" in the Handouts > webscraping folder.
+* Let's scrape the tables in "pdxTreesHTMLTable.html".
+    + It is in both the shared folder on the Server and the `materials` repo on GitHub.
 
-* Now let's scrape that table with `rvest` and see what it looks like.
+* Now let's scrape the tables with `rvest`.
 
 ```{r, eval = FALSE}
-pdx_tables <- read_html("~/shared_data/stat108/handouts/pdxTreesHTMLTable.html") %>%
+pdx_tables <- read_html("https://raw.githubusercontent.com/harvard-stat108s23/materials/main/handouts/pdxTreesHTMLTable.html") %>%
   html_nodes("table") %>%
   html_table()
 ```
@@ -71,7 +72,6 @@ current_teams2 <- url %>%
 ```
 
 # Another Example
-
 
 Let's scrape the [NYTimes.com's College Access Index](https://www.nytimes.com/interactive/2017/05/25/sunday-review/opinion-pell-table.html) table.
 
