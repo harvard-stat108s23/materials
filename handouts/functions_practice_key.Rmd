@@ -1,0 +1,123 @@
+---
+title: "Function Practice"
+author: "Insert Name"
+date: "Stat 108, Week 8"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+
+### Problems
+
+a.  Turn the following working code into an R function.  Make sure to give it a good name.
+
+
+```{r, eval = TRUE}
+library(pdxTrees)
+pdxTrees <- get_pdxTrees_parks()
+mean(is.na(pdxTrees$Tree_Height))
+```
+
+```{r}
+# answer
+# although the above does not necessarily ask for us to also report the number of NAs, 
+# it may be nice to add it since we are now working with a function
+
+na_stats <- function(x, trim = 0) {
+  count <- sum(is.na(x))
+  prop <- mean(is.na(x), trim = trim)
+  return(data.frame("count" = count,
+                    "prop" = prop))
+}
+```
+
+
+
+b. For the following function, `thing`, figure out what it is trying to do.  Then 
+
+* Fix the function and argument names.
+* Fix the order of the arguments.
+* Fix defaults.
+* Consider ways we could generalize the function.
+
+```{r, eval = TRUE}
+thing <- function(na.rm = FALSE, x = c(7, 1), y = c(3, 4)) {
+  var1 <- mean(x, na.rm = TRUE)
+  var2 <- mean(y, na.rm = TRUE)
+  xx <- var(x, na.rm = TRUE)
+  yy <- var(y, na.rm = TRUE)
+  na <- length(x)
+  nb <- length(y)
+  df <- min(na, nb) - 1
+  important_bit <- (var1 - var2 - 0)/sqrt(xx/na + yy/nb)
+  pt(q = abs(important_bit), df = df, lower.tail = FALSE)*2
+}
+
+
+## Test it!
+# Generate data for testing
+x <- rnorm(n = 10)
+y <- rnorm(n = 20, mean = 2)
+
+# Test
+thing(na.rm = TRUE, x = x, y = y)
+thing(na.rm = FALSE)
+```
+
+
+```{r}
+two_sample_t_test <- function(x, y, na.rm = FALSE, null = 0, one_sided = FALSE) {
+  stopifnot(is.numeric(x))
+  stopifnot(is.numeric(y))
+  mean_x <- mean(x, na.rm = na.rm)
+  mean_y <- mean(y, na.rm = na.rm)
+  var_x <- var(x, na.rm = na.rm)
+  var_y <- var(y, na.rm = na.rm)
+  n_x <- sum(!is.na(x))
+  n_y <- sum(!is.na(y))
+  df <- min(n_x, n_y) - 1
+  test_stat <- (mean_x - mean_y - null)/sqrt(var_x/n_x + var_y/n_y)
+  p_value <- pt(q = abs(test_stat), df = df, lower.tail = FALSE)
+  return(data.frame(test_stat = test_stat,
+                    df = df, 
+                    p_value = ifelse(one_sided, p_value, p_value * 2)))
+}
+```
+
+
+```{r}
+## TESTING ##
+
+# test two samples that clearly have different means:
+x_1 <- rnorm(n = 10, mean = 0.5)
+y_1 <- rnorm(n = 20, mean = 3)
+two_sample_t_test(x = x_1, y = y_1)
+# make sure that the "one sided" functionality works correctly
+two_sample_t_test(x = x_1, y = y_1, one_sided = TRUE)
+
+# now, try two samples that have the same mean
+x_2 <- rnorm(n = 50, mean = 2)
+y_2 <- rnorm(n = 60, mean = 2)
+two_sample_t_test(x = x_2, y = y_2)
+
+# try two samples that have slightly different means
+x_3 <- rnorm(n = 30, mean = 2)
+y_3 <- rnorm(n = 40, mean = 2.1)
+two_sample_t_test(x = x_3, y = y_3)
+
+# try two samples that have slightly different means, but more observations
+x_4 <- rnorm(n = 300, mean = 2)
+y_4 <- rnorm(n = 400, mean = 2.1)
+two_sample_t_test(x = x_4, y = y_4)
+
+# try inputting in non-numeric vectors for x, y, and ensure that it throws an error:
+x_5 <- c("hello", "hi")
+x_5 <- c("bye", "goodbye", "goodnight")
+two_sample_t_test(x = x_5, y = y_5)
+```
+
+

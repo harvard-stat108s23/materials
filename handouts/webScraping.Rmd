@@ -1,0 +1,102 @@
+---
+title: "Web Scraping with `rvest`"
+subtitle: "Stat 108, Week 12"
+output: pdf_document
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+```{r}
+#Load web scraping library
+library(rvest)
+```
+
+
+# Understanding HTML Tables
+
+* In our shared folder, open the document "pdxTreesHTMLTable.html" in the Handouts > webscraping folder.
+
+* Now let's scrape that table with `rvest` and see what it looks like.
+
+```{r, eval = FALSE}
+pdx_tables <- read_html("~/shared_data/stat108/handouts/pdxTreesHTMLTable.html") %>%
+  html_nodes("table") %>%
+  html_table()
+```
+
+* Examine the structure.
+
+```{r, eval = FALSE}
+pdx_tables
+class(pdx_tables)
+class(pdx_tables[2])
+class(pdx_tables[[2]])
+
+TREES <- pdx_tables[[2]]
+TREES
+```
+
+
+# Grab Tables from the Web
+
+Let's grab the **Current teams** table on Boston sport teams' [Wikipedia page](https://en.wikipedia.org/wiki/Sports_in_Boston).
+
+```{r}
+#Store url
+url <- "https://en.wikipedia.org/wiki/Sports_in_Boston"
+
+## Scrape html and store table
+
+#Option 1: Grab all the tables and then navigate to the one you wanted.
+tables <- url %>%
+  read_html() %>%
+  html_nodes(css = "table")
+
+#Grab the specific table
+current_teams <- html_table(tables[[1]], fill = TRUE)
+current_teams
+
+#Option 2: Use the specific css
+#NOTICE: nodes is now node!
+current_teams2 <- url %>%
+  read_html() %>%
+  html_node(css = "table.wikitable:nth-child(15)") %>%
+  html_table()
+
+
+
+```
+
+# Another Example
+
+
+Let's scrape the [NYTimes.com's College Access Index](https://www.nytimes.com/interactive/2017/05/25/sunday-review/opinion-pell-table.html) table.
+
+```{r}
+# Store url
+url <- "https://www.nytimes.com/interactive/2017/05/25/sunday-review/opinion-pell-table.html"
+
+## Scrape html and store table
+
+# Grab the table
+tables <- url %>%
+  read_html() %>%
+  html_nodes(css = "table")
+
+#Grab the specific table
+college_access_table <- html_table(tables[[1]], fill = TRUE)
+
+#Option 2: Use the specific css
+college_access_table2 <- url %>%
+  read_html() %>%
+  html_node(css = ".table") %>%
+  html_table()
+
+```
+
+
+
+Easier route: Let's see how to use `datapasta` to grab the data for this example!

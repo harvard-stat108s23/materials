@@ -1,0 +1,129 @@
+---
+title: "Practicing Regular Expressions"
+subtitle: "Stat 100 Section"
+date: "Week 6"
+output: pdf_document
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+```{r}
+#Load tidyverse
+library(tidyverse)
+```
+
+
+For the following problems, use `str_view_all()` to identify the pattern with a Regular Expression.
+
+## Problem 1
+
+For this problem we are going to use a subset of the character vector `fruit` that lives in `stringr`.
+
+```{r}
+set.seed(4433)
+fruit_s <- sample(fruit, 20)
+```
+
+
+a. Highlight the pattern "berry".
+
+```{r}
+
+```
+
+b. Now highlight all the fruits that contain the pattern "berry".  (Don't just highlight the word "berry").
+
+```{r}
+
+```
+
+c. Highlight only fruits that contain "berry" and are one word.
+
+```{r}
+
+```
+
+d. Highlight any repeated characters (e.g. "oo", "ll").
+
+```{r}
+
+```
+
+e. Highlight fruits that start with a vowel.
+
+```{r}
+
+```
+
+f. Highlight fruits that don't start with a vowel.
+
+```{r}
+
+```
+
+g. Highlight the second to last character of fruits that end in a vowel.
+
+```{r}
+
+```
+
+## Problem 2
+
+For this problem, let's continue to use these lyrics about numbers:
+
+```{r}
+lyrics <- c("But I would walk 500 miles",
+            "2000 0 0 party over oops out of time!", 
+            "1 is the loneliest number that you'll ever do",
+            "When I'm 64",
+            "Where 2 and 2 always makes a 5")
+```
+
+
+
+a. Locate all words that start with "w" or "W".
+
+
+```{r}
+
+```
+
+b. Find all the non-numbers.
+
+```{r}
+
+```
+
+
+c. Locate all the words that are at least five letters long.
+
+```{r}
+
+```
+
+d. Locate all characters that appear after punctuation.
+
+```{r}
+
+```
+
+
+e. Locate all the places where there are two vowels in a row.
+
+
+```{r}
+
+```
+
+f. Find words that start with vowels.
+
+Hint: Consider using `\\b` to find the start of the word.
+
+```{r}
+
+```
+
+
