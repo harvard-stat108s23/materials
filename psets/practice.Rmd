@@ -1,0 +1,208 @@
+---
+title: "Not a P-Set, Just Practice"
+author: "Insert Name"
+date: "Stat 108, Week 13"
+output:
+  pdf_document: default
+urlcolor: blue
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+
+```{r}
+# Put all necessary libraries here
+library(tidyverse)
+library(rvest)
+library(janitor)
+```
+
+## Goals of these practice problems
+
+1. Scrape data from the web.
+1. Practice interacting with and wrangling web data.
+1. Practice writing SQL queries.  
+
+## Problems
+
+
+### Problem 1
+
+Let's see what lovely data we can pull from Harvard's own website.
+
+a. Go to [https://oira.harvard.edu/factbook/fact-book-admissions/](https://oira.harvard.edu/factbook/fact-book-admissions/) and scrap the table.  But first check whether or not the website allows scraping.
+
+
+```{r}
+
+```
+
+b. Wrangle the table from (a) so that you can produce graphs exploring how these admissions statistics have varied over the last decade.  What interesting trends do you observe in your graphs?
+
+
+
+```{r}
+
+```
+
+c. Now grab the table with the title "Degrees Conferred by School and IPEDS Race/Ethnicity: AY2021-22" from [this page](https://oira.harvard.edu/factbook/fact-book-degrees/#deg_conc).  
+
+```{r}
+```
+
+d. Wrangle the table from (c) into a tidy format.
+
+
+```{r}
+
+```
+
+e. Produce a useful graph that summarizes the data from (d).
+
+```{r}
+
+```
+
+### Problem 2
+
+Let's practice interacting with data from an API.  Here's example code that finds the most recent questions about `ggplot2` on StackOverflow.
+
+```{r}
+library(httr)
+
+ggplt <- GET(
+  "http://api.stackexchange.com",
+  path = "questions",
+  query = list(
+    site = "stackoverflow.com",
+    tagged = "ggplot2"
+  )
+)
+```
+
+
+
+a. Modify the call to the StackOverflow to get the most recent questions about `dplyr`.  
+
+```{r}
+
+```
+
+
+b. Wrangle the data provided from the API in (a) so that you have a data frame with one row per question and the variables: `title`, `view_count`, and `is_answered`.
+
+```{r}
+
+```
+
+c. Create a graph of `view_count` and `is_answered`.
+
+```{r}
+
+```
+
+
+
+
+### Problem 3
+
+In Problems 3 and 4, you will return to the imdb MySQL server to answer questions about the movie "Hidden Figures" (in Problem 3) and "Spiderman" (in Problem 4).
+
+A few notes before you get started:
+
+* Since our goal is to practice using `MySQL` commands, I'd recommend writing `MySQL` code, not `dplyr` code.
+* Each problem has many parts to the SQL query.  Try to write one step, see how that does, then write another, and so on.  
+* I think it is always a good idea to start with the following command when exploring a new table:
+
+```{r, eval = FALSE}
+db %>% 
+  dbGetQuery("SELECT * 
+              FROM name
+              LIMIT 0, 10;")
+```
+
+* **DON'T query a LARGE table**.  Use the `LIMIT` argument as you are building up your code.  Most of your final answers will not require the `LIMIT` argument.
+* [This schema](https://imgur.com/pDq0n) is very helpful for understanding how the tables in the database are connect.
+
+
+
+
+
+a. Connect to Smith's im(db) MySQL server.
+
+```{r, message=FALSE}
+library(RMySQL)
+db <- dbConnect(MySQL(), 
+                host = "scidb.smith.edu", 
+                user = "sds192", 
+                password = "DSismfc@S", 
+                dbname = "imdb")
+```
+
+b. Explain what the following code does?
+
+```{r, eval = FALSE}
+hf_films <- db %>% 
+  dbGetQuery("SELECT * 
+              FROM title
+              WHERE title = 'Hidden Figures' AND kind_id = 1;")
+```
+
+
+
+
+c. For "Hidden Figures", create a table that contains the names of the people involved and their role (e.g., actress, crew, ...).  Use the `cast_info`, `role_type`, and `name` datasets.
+
+```{r}
+
+```
+
+
+d. Add one more join to your query from c: the character name (found in `char_name`).  Try both `JOIN` and `LEFT JOIN`.  How does your answer vary between the two joins? 
+
+
+```{r}
+
+```
+
+
+
+
+e.  Create a table that reports the number of times Octavia Spencer, Janelle Monáe, and Taraji P. Henson have each been in a title broken down by the different kinds of titles and by actress.  Arrange your table by actress and then by kind.  (Your final table should not contain any keys.)
+
+
+```{r}
+
+```
+
+
+
+
+
+###  Problem 4
+
+In this problem, let's research our friendly neighborhood hero, Spider-man.
+
+a. List all the actors who have played Spider-man in a movie more than once and include how many times they played Spider-man. (Hint: Useful tables: `cast_info`, `title`, `char_name`, and `name`.)
+
+```{r}
+
+```
+
+b. Produce a table that verifies that an `id` of 101 in `info_type` corresponds to an IMDB `rating` in the table `movie_info_idx`.
+
+```{r}
+
+```
+
+
+
+c. For the movies with someone who played Spider-man, list the 10 with the highest rating on IMDB (can be found in `movie_info_idx` `id` = 101) and the production year. How many of these have you seen?
+
+```{r}
+
+```
+
